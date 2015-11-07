@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>通信確認</title>
+<script type="text/javascript" src="js/libs/jquery-1.11.3.min.js"></script>
+
+<style type="text/css">
+#textarea-log {
+　　resize: none;
+	width:300px;
+	height:100px;
+	max-width:300px;
+	max-height:100px;
+}
+</style>
+
+<script>
+$(function(){
+	
+	var ws = null;
+	var serverUrl = "ws://52.192.81.231:3000";
+	var channel = -1;
+	
+	var $channel = $('#select_room');
+	var $out     = $('#textarea_log');
+	
+	function init ()
+	{
+		connect();
+		console.log("initialized");	
+	}
+	
+	function connect ()
+	{
+		if (ws == null) {
+			ws = new WebSocket(serverUrl);
+			ws.onopen    = onOpen;
+			ws.onmessage = onMessage;
+			ws.onclose   = onClose;
+			ws.onerror   = onError;
+		}
+		console.log ("connect");
+	}
+	
+	function onOpen (event) {
+		addLog("open " + serverUrl);
+		console.log ("open");
+	}
+	
+	function onMessage (event)
+	{
+		
+		// TEXT ver
+		var mes = event.data;
+		str = mes.split(",");
+		
+		if ($channel.val() == -1)
+		{
+			// すべて表示
+			addLog(mes);	
+		} else {
+			// 設定したチャンネルに一致したものだけ表示
+			if ($channel.val() == str[0])
+			{
+				addLog(str[1]);	
+			}
+		}
+
+		/*
+		// JSON ver
+		var mes = JSON.parse(event.data);
+		if ($channel.val() == -1)
+		{
+			// すべて表示
+			addLog(mes.trigger);	
+		} else {
+			// 設定したチャンネルに一致したものだけ表示
+			if ($channel.val() == mes.channel)
+			{
+				addLog(mes.trigger);	
+			}
+		}
+		*/
+		
+	}
+	
+	// error event
+	function onError (event)
+	{
+		console.log ("error");
+	}
+
+	// disconnect event
+	function onClose (event)
+	{
+		console.log ("close");
+		ws = null;
+	}
+	
+	$channel.on('change', function (){
+		addLog ("set channel : " + $channel.val());
+	}).change();
+	
+	function addLog (txt_) {
+		var now = new Date();
+		$out.append(now.toLocaleTimeString() + "  " + txt_ +"&#13;");
+		$out.scrollTop($out[0].scrollHeight);
+	}
+	
+	init();
+	
+});
+</script>
+</head>
+	
+<body>
+<label for="room">room:</label>
+<br/>
+<select name="room" id="select_room">
+<option value="-1">*</option>
+<option value="0">0</option>
+<option value="1">1</option>
+<option value="2">2</option>
+<option value="3">3</option>
+<option value="4">4</option>
+<option value="5">5</option>
+<option value="6">6</option>
+<option value="7">7</option>
+<option value="8">8</option>
+<option value="9">9</option>
+</select>
+
+<br/>
+<br/>
+<label for="log">log:</label>
+<br/>
+<textarea name="textarea_log" cols="60" rows="10" id="textarea_log" readonly disabled></textarea>
+
+</body>
+</html>
