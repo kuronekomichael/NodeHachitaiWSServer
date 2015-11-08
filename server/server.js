@@ -11,6 +11,7 @@ wss.broadcast = function (data) {
 
 wss.on ('connection', function (ws) {
 	ws.on ('message', function (message) {
+
 		var now = new Date();
 		console.log (now.toLocaleString() + ' Received: %s', message);
 		wss.broadcast (message);
